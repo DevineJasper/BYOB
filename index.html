@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Polygon fill</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100%;
+    }
+
+    /* #c {
+      width: 3840px;
+      height: 1080px;
+      display: block;
+    } */
+  </style>
+</head>
+
+<body>
+  <canvas id="c" width="3840" height="1080"></canvas>
+  <script src="scripts/delaunay.js"></script>
+
+  <script>
+
+    {
+
+      const canvas = document.getElementById('c');
+      const ctx = canvas.getContext('2d');
+
+      let vertices = [],
+        indices = [],
+        fragments = [];
+
+      let colors = [[0, 85, 255], [236, 32, 36], [255, 0, 216], [255, 216, 0], [0, 166, 255], [255, 233, 227], [182, 244, 176]];
+      //let colors = [[255, 233, 227], [255, 255, 255]];
+      //let colors = [[236, 32, 36], [255, 216, 0], [182, 244, 176]];
+
+
+      const init = () => {
+        document.addEventListener(`click`, handleClick);
+
+        drawRandomPoints();
+      };
+
+
+      const drawRandomPoints = () => {
+
+        ctx.clearRect(0, 0, 3840, 1080);
+
+
+        vertices = [];
+        indices = [];
+        fragments = [];
+
+
+        ctx.fillStyle = 'rgb(0,0,0)'; // sets the color to fill in the rectangle with
+        console.log(`draw points`);
+        for (i = 0; i < 100; i++) {
+          console.log(`points`);
+
+          vertices.push([Math.floor(Math.random() * 3840), Math.floor(Math.random() * 1080)]);
+
+        }
+
+        // vertical
+        for (i = 0; i < 10; i++) {
+          console.log(`points`);
+
+          vertices.push([0, Math.floor(Math.random() * 3840)]);
+          vertices.push([3840, Math.floor(Math.random() * 3840)]);
+        }
+
+        // horizontal
+        for (i = 0; i < 20; i++) {
+          vertices.push([Math.floor(Math.random() * 3840), 0]);
+          vertices.push([Math.floor(Math.random() * 3840), 1080]);
+
+
+          console.log(`points`);
+        }
+
+        // draw corner points
+        vertices.push([0, 0]);
+        vertices.push([3840, 0]);
+        vertices.push([3840, 1080]);
+        vertices.push([0, 1080]);
+
+
+        console.log(`vertices`, vertices);
+
+
+        indices = Delaunay.triangulate(vertices);
+
+        console.log(`indices`, indices);
+
+        for (let i = 0; i < indices.length; i += 3) {
+          fragments.push(new Fragment(
+            vertices[indices[i + 0]],
+            vertices[indices[i + 1]],
+            vertices[indices[i + 2]]
+          ));
+        }
+
+        // for (var i = 0; i < 30; i += 1) {
+        //   let fragment = new Fragment();
+        //   fragment.draw();
+        // }
+
+        // for (let i = 0; i < fragments.length; i++) {
+        //   fragments[i].draw();
+        // }
+
+
+        let fragmentIndex = 0
+        let inverseIndex = 281
+        const timeout = () => {
+          setTimeout(() => {
+
+            if (fragmentIndex <= 140) {
+              fragmentIndex++;
+              console.log(fragmentIndex);
+              fragments[fragmentIndex].draw();
+            }
+
+            if (inverseIndex >= 140) {
+              inverseIndex--;
+              console.log(inverseIndex);
+              fragments[inverseIndex].draw();
+            }
+
+
+
+            // Do Something Here
+            // Then recall the parent function to
+            // create a recursive loop.
+            timeout();
+          }, 20);
+        }
+
+        timeout();
+
+
+
+        // fragments.forEach((fragment, index) => {
+        //   console.log(`index`, index);
+        //   // while (index <= 100) {
+        //   //   fragment.draw();
+
+        //   // }
+
+        //   if (index < 140) {
+
+        //   }
+
+        //   if (index > 141) {
+        //     fragment.draw();
+        //   }
+
+
+        // });
+
+
+
+
+      }
+
+      class Fragment {
+        constructor(v0, v1, v2) {
+          this.v0 = v0;
+          this.v1 = v1;
+          this.v2 = v2;
+          this.tri = [v0, v1, v2];
+
+          this.fillOffsetX1 = 0;
+          this.fillOffsetY1 = 0;
+          this.fillOffsetX2 = 0;
+          this.fillOffsetY2 = 0;
+
+          this.mouseOver = false;
+          this.visible = true;
+
+          this.setColors();
+          this.calculateDeltas();
+        }
+
+        setColors() {
+          let color = colors[Math.floor(Math.random() * colors.length)];
+
+          this.fill = `rgb(${color.join(',')})`;
+          this.stroke = `rgb(${color.join(',')})`;
+
+        }
+
+        calculateDeltas() {
+          this.fillOffsetX1 = this.v1[0] - this.v0[0];
+          this.fillOffsetY1 = this.v1[1] - this.v0[1];
+          this.fillOffsetX2 = this.v2[0] - this.v0[0];
+          this.fillOffsetY2 = this.v2[1] - this.v0[1];
+        }
+
+        draw() {
+          if (this.visible === false) return;
+
+          ctx.strokeStyle = this.fill;
+          ctx.fillStyle = this.stroke;
+
+          ctx.beginPath();
+          ctx.moveTo(this.v0[0], this.v0[1]);
+          ctx.lineTo(this.v0[0] + this.fillOffsetX1, this.v0[1] + this.fillOffsetY1);
+          ctx.lineTo(this.v0[0] + this.fillOffsetX2, this.v0[1] + this.fillOffsetY2);
+          ctx.closePath();
+          ctx.stroke();
+          ctx.fill();
+        }
+      }
+
+      // const randomRange = (min, max) => {
+      //   return min + Math.random() * (max - min);
+      // }
+
+      const handleClick = () => {
+        drawRandomPoints();
+      }
+
+      init();
+
+    }
+
+  </script>
+
+</body>
+
+</html>
