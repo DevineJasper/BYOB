@@ -30,6 +30,11 @@
   let fragmentIndex;
   let inverseIndex;
 
+  let drawArray = [];
+
+  let gridSize = [10, 6];
+
+
 
   let gameOver = false;
 
@@ -38,55 +43,62 @@
   const init = () => {
     document.addEventListener(`click`, handleClick);
 
+    // Draw the random points
     drawRandomPoints();
+    generateColors();
+
+    // Assign each player a starting key
     getPlayerKey(1);
     getPlayerKey(2);
 
-    document.addEventListener("keydown", e => {
-      if (gameOver === false) {
-        if (e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39) {
-          //console.log(e.keyCode);
-          if (e.keyCode === player1Key.buttonValue) {
-            console.log(`Player 1: Juiste toets`);
-            getPlayerKey(1);
 
-            // TEKEN HIER HET VOLGENDE DEELTJE
+    // Handle keydown events
+    document.addEventListener("keydown", handleKeyPress);
 
-            drawTriangles(1);
+    //ctx.context.globalCompositeOperation = 'lighter';
 
-            fragmentIndex++;
+    // Execute the draw function
+    draw();
+  };
 
-          } else {
-            console.log(`Player 1: FOUT!!!`);
+  // - Handle the key presses and draw triangles when the correct key is pressed
+  const handleKeyPress = e => {
+    console.log(`test`);
+    if (gameOver === false) {
+      if (e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39) {
+        if (e.keyCode === player1Key.buttonValue) {
+          console.log(`Player 1: Juiste toets`);
+          getPlayerKey(1);
 
-          }
-        }
+          // TEKEN HIER HET VOLGENDE DEELTJE
+          drawTriangles(1);
 
-        if (e.keyCode === 65 || e.keyCode === 87 || e.keyCode === 68) {
-          //console.log(e.keyCode);
-          if (e.keyCode === player2Key.buttonValue) {
-            console.log(`Player 2: Juiste toets`);
-            getPlayerKey(2);
+          fragmentIndex++;
 
-            // TEKEN HIER HET VOLGENDE DEELTJE
-
-            drawTriangles(2);
-
-            inverseIndex--;
-
-
-          } else {
-            console.log(`Player 2: FOUT!!!`);
-
-          }
+        } else {
+          console.log(`Player 1: FOUT!!!`);
         }
       }
 
-    });
-  };
+      if (e.keyCode === 65 || e.keyCode === 87 || e.keyCode === 68) {
+        if (e.keyCode === player2Key.buttonValue) {
+          console.log(`Player 2: Juiste toets`);
+          getPlayerKey(2);
+
+          // TEKEN HIER HET VOLGENDE DEELTJE
+          drawTriangles(2);
+
+          inverseIndex--;
+
+        } else {
+          console.log(`Player 2: FOUT!!!`);
+        }
+      }
+    }
+  }
 
   const getPlayerKey = player => {
-
+    // Pick a random key for each player
     if (player === 1) {
       player1Key = player1Buttons[Math.floor(Math.random() * player1Buttons.length)];
     }
@@ -101,49 +113,29 @@
     }
   }
 
-
+  // -- CREATE THE POINTS --
   const drawRandomPoints = () => {
 
+    // Clear the canvas;
     ctx.clearRect(0, 0, 3840, 1080);
 
-
+    // clear the arrays for the vertices, indices and fragments of the triangles;
     vertices = [];
     indices = [];
     fragments = [];
 
-
     ctx.fillStyle = 'rgb(0,0,0)'; // sets the color to fill in the rectangle with
     console.log(`draw points`);
-    // for (i = 0; i < 100; i++) {
-    //   console.log(`points`);
-    //   vertices.push([Math.floor(Math.random() * canvas.width), Math.floor(Math.random() * canvas.height)]);
-    // }
 
-    for (i = 0; i < 21; i++) {
-      for (j = 0; j < 13; j++) {
+    // generate random points
+    for (i = 0; i < gridSize[0] + 1; i++) {
+      for (j = 0; j < gridSize[1] + 1; j++) {
         vertices.push([
-          i * 192 + randomRange(-150, 150),
-          j * 90 + randomRange(-150, 150)
+          i * canvas.width / gridSize[0] + randomRange(-150, 150),
+          j * canvas.height / gridSize[1] + randomRange(-150, 150)
         ]);
       }
     }
-
-    // // vertical
-    // for (i = 0; i < 10; i++) {
-    //   console.log(`points`);
-
-    //   vertices.push([0, Math.floor(Math.random() * canvas.width)]);
-    //   vertices.push([3840, Math.floor(Math.random() * canvas.width)]);
-    // }
-
-    // // horizontal
-    // for (i = 0; i < 20; i++) {
-    //   vertices.push([Math.floor(Math.random() * canvas.width), 0]);
-    //   vertices.push([Math.floor(Math.random() * canvas.width), canvas.height]);
-
-
-    //   console.log(`points`);
-    // }
 
     // draw corner points
     vertices.push([0, 0]);
@@ -151,67 +143,49 @@
     vertices.push([canvas.width, canvas.height]);
     vertices.push([0, canvas.height]);
 
-
-    console.log(`vertices`, vertices);
-
-
+    // Generate the triangles
     indices = Delaunay.triangulate(vertices);
 
-    console.log(`indices`, indices);
-
+    // Create fragments
     for (let i = 0; i < indices.length; i += 3) {
       fragments.push(new Fragment(
         vertices[indices[i + 0]],
         vertices[indices[i + 1]],
         vertices[indices[i + 2]]
       ));
-
-      // centers.push([new Fragment(
-      //   vertices[indices[i + 0]],
-      //   vertices[indices[i + 1]],
-      //   vertices[indices[i + 2]]
-      // ),
-      // (vertices[indices[i + 0][0]] + vertices[indices[i + 1][0]] + vertices[indices[i + 2][0]]) / 3])
     }
 
-    // fragments.forEach(fragment => {
-    //   console.log(`tri`, fragment.tri);
-    //   centers.push[]
-    // })
-
+    // Sort the fragments
     sortTriangles(fragments);
 
-    console.log(`FRAGMENTS`, fragments);
-    console.log(`Centerpoints`, centers);
-
-
-    for (let i = 0; i < 18; i++) {
-      // 59
-      let h = 237,
-        s = '100%',
-        l = `${randomRange(20, 40)}%`;
-      colorsPlayer1.push([h, s, l]);
-    }
-
-    for (let i = 0; i < 18; i++) {
-      // 123
-      let h = 303,
-        s = '100%',
-        l = `${randomRange(20, 40)}%`;
-      colorsPlayer2.push([h, s, l]);
-    }
-
+    // Calculate starting points of both sides
     fragmentIndex = 0;
     inverseIndex = fragments.length - 1;
-
-    timeout();
-
   }
 
+  // -- Generate the colors --
+  const generateColors = () => {
+
+    for (let i = 0; i < 18; i++) {
+      let h = 237,
+        s = '100%',
+        l = `${Math.round(randomRange(20, 40))}%`,
+        a = 1;
+      colorsPlayer1.push([h, s, l, a]);
+    }
+
+    for (let i = 0; i < 18; i++) {
+      let h = 303,
+        s = '100%',
+        l = `${Math.round(randomRange(20, 40))}%`,
+        a = 1;
+      colorsPlayer2.push([h, s, l, a]);
+    }
+  }
+
+  // -- Sort the triangles --
   const sortTriangles = fragments => {
     console.log(`fragments in sort`, fragments);
-
-
 
     newFragments = fragments.sort((a, b) => {
       //sort by x, secondary by y
@@ -222,59 +196,119 @@
 
   }
 
-  const timeout = () => {
-    setTimeout(() => {
+  // -- Draw triangles with interval --
+  // const timeout = () => {
+  //   setTimeout(() => {
 
+  //     if (fragmentIndex >= inverseIndex + 1) {
+  //       console.log(`kapot`);
+  //       return;
+  //       gameOver = true;
+  //     }
 
-      if (fragmentIndex >= inverseIndex + 1) {
-        console.log(`kapot`);
-        return;
-        gameOver = true;
-      }
+  //     if (fragmentIndex <= (fragments.length / 2)) {
+  //       let color = colorsPlayer1[Math.floor(Math.random() * colorsPlayer1.length)];
+  //       //console.log(fragmentIndex);
+  //       //newFragments[fragmentIndex].draw(color);
+  //       //drawQueuedShapes(drawArray);
+  //       //fadeIn(newFragments[fragmentIndex], color, 100);
+  //       fragmentIndex++;
+  //     }
 
-      if (fragmentIndex <= (fragments.length / 2)) {
-        let color = colorsPlayer1[Math.floor(Math.random() * colorsPlayer1.length)];
+  //     if (inverseIndex >= (fragments.length / 2)) {
+  //       let color = colorsPlayer2[Math.floor(Math.random() * colorsPlayer2.length)];
+  //       //console.log(inverseIndex);
+  //       //newFragments[inverseIndex].draw(color);
+  //       //drawQueuedShapes(drawArray);
+  //       drawArray.push(newFragments)
+  //       //fadeIn(newFragments[inverseIndex], color, 100);
+  //       inverseIndex--;
+  //     }
+  //     timeout();
+  //   }, 20);
+  // }
 
-        //console.log(fragmentIndex);
-        newFragments[fragmentIndex].draw(color);
-        fragmentIndex++;
-      }
+  // const fadeIn = (fragment, color, initialColor, opacity) => {
+  //   let steps = 100;
+  //   let initialColorTest = initialColor;
+  //   console.log(`LUMINANCE`, initialColorTest[2]);
+  //   let startValue = 100;
+  //   // let h = 0,
+  //   //   s = '0%',
+  //   //   l = `100%`;
+  //   console.log(color);
+  //   let timeOut;
+  //   timeOut = setTimeout(() => {
+  //     // if (fragmentIndex >= inverseIndex + 1) {
+  //     //   console.log(`kapot`);
+  //     //   return;
+  //     //   gameOver = true;
+  //     // }
 
-      if (inverseIndex >= (fragments.length / 2)) {
-        let color = colorsPlayer2[Math.floor(Math.random() * colorsPlayer2.length)];
+  //     if (startValue >= initialColor) {
+  //       //fragment.draw(color);
+  //       let newColor = color[2].replace(/%/g, "");
+  //       console.log(`gesliced kleur`, newColor);
+  //       parseFloat(newColor);
+  //       startValue -= 1;
+  //       newColor = `${newColor}%`;
+  //       console.log(`new new color`, newColor);
+  //       //fragment.draw([h, s, l, opacity]);
+  //       //console.log(`OPACITY`, opacity);
+  //       //fadeIn(fragment, color, initialColorTest, opacity);
+  //     } else {
+  //       console.log(`BANAAAN`);
+  //       fragment.draw(color);
+  //       clearTimeout(timeOut);
+  //     }
+  //   }, 100);
 
-        //console.log(inverseIndex);
-        newFragments[inverseIndex].draw(color);
-        inverseIndex--;
-      }
-      timeout();
-    }, 40);
-  }
+  // }
+  // const fadeIn = (fragment, color, initialValue) => {
+  //   let timeOut;
+  //   let drawColor;
+  //   console.log(`fragment`, fragment);
+  //   console.log(`color`, color);
+  //   console.log(`initialvalue`, initialValue);
+  //   let currentLuminanceValue = color[2].replace(/%/g, "");
+  //   parseFloat(currentLuminanceValue);
+  //   timeOut = setTimeout(() => {
+  //     if (initialValue >= currentLuminanceValue) {
+  //       let drawColor = [color[0], color[1], `${initialValue}%`, color[3]];
+  //       //drawColor = `${newColor}%`;
+  //       //fragment.draw(drawColor);
+  //       initialValue -= 3;
+  //       //console.log(`deze if werkt man`);
+  //       drawArray.push({ fragment: fragment, color: drawColor });
+  //       fadeIn(fragment, color, initialValue);
+  //     }
+  //   }, 1);
+  // }
 
+  // -- Draw the triangles based on player input
   const drawTriangles = player => {
 
-    // timeout();
+    if (fragmentIndex >= inverseIndex + 1) {
+      console.log(`STOP`);
+      return;
+      gameOver = true;
+    }
 
-    // if (fragmentIndex >= inverseIndex + 1) {
-    //   console.log(`kapot`);
-    //   return;
-    //   gameOver = true;
-    // }
+    if (player === 1) {
+      let color = colorsPlayer1[Math.floor(Math.random() * colorsPlayer1.length)];
 
-    // if (player === 1) {
-    //   let color = colorsPlayer1[Math.floor(Math.random() * colorsPlayer1.length)];
+      console.log(`Fragmentindex`, fragmentIndex);
+      //newFragments[fragmentIndex].draw(color);
+      drawArray.push({ fragment: [newFragments[fragmentIndex]], color: color });
 
-    //   console.log(`Fragmentindex`, fragmentIndex);
-    //   newFragments[fragmentIndex].draw(color);
+    }
 
-    // }
-
-    // if (player === 2) {
-    //   let color = colorsPlayer2[Math.floor(Math.random() * colorsPlayer2.length)];
-    //   console.log(`inverseIndex`, inverseIndex);
-    //   newFragments[inverseIndex].draw(color);
-
-    // }
+    if (player === 2) {
+      let color = colorsPlayer2[Math.floor(Math.random() * colorsPlayer2.length)];
+      console.log(`inverseIndex`, inverseIndex);
+      //newFragments[inverseIndex].draw(color);
+      drawArray.push({ fragment: [newFragments[inverseIndex]], color: color });
+    }
   }
 
   class Fragment {
@@ -314,11 +348,10 @@
     draw(color) {
       if (this.visible === false) return;
 
-      ctx.fillStyle = `hsl(${color})`; // sets the color to fill in the rectangle with
-      ctx.strokeStyle = `hsl(${color})`; // sets the color to fill in the rectangle with
-      // ctx.lineWidth = 10;
-
-
+      ctx.fillStyle = `hsla(${color})`; // sets the color to fill in the rectangle with
+      ctx.strokeStyle = `hsla(${color})`; // sets the color to fill in the rectangle with
+      //ctx.strokeStyle = `rgb(255, 255, 255)`; // sets the color to fill in the rectangle with
+      //ctx.lineWidth = 3;
 
       ctx.beginPath();
       ctx.moveTo(this.v0[0], this.v0[1]);
@@ -336,6 +369,41 @@
 
   const handleClick = () => {
     drawRandomPoints();
+  }
+
+  const drawQueuedShapes = shapes => {
+    //console.log(`ik test de queue functie`);
+  }
+
+  const draw = () => {
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    Object.keys(drawArray).forEach((item) => {
+      //console.log(`key`, item); // key
+      //console.log(`value`, drawArray[item]); // value
+
+      //console.log(drawArray[item].fragment[0].centerPointX);
+
+      drawArray[item].fragment[0].draw(drawArray[item].color);
+    });
+
+    // drawArray.forEach(fragment => {
+    //   fragment.
+    // })
+
+    //console.log(`drawArray`, drawArray);
+
+    requestAnimationFrame(draw);
+
+  }
+
+  var lastLoop = new Date();
+  function gameLoop() {
+    var thisLoop = new Date();
+    var fps = 1000 / (thisLoop - lastLoop);
+    lastLoop = thisLoop;
+    console.log(fps);
   }
 
   init();
