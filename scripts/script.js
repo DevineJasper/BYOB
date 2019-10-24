@@ -6,8 +6,8 @@
   let vertices = [],
     indices = [],
     fragments = [],
-    centers = [],
-    newFragments = [];
+    newFragments = [],
+    drawArray = [];
 
   let colorsPlayer1 = [],
     colorsPlayer2 = [];
@@ -16,25 +16,19 @@
     { buttonName: "left", buttonValue: 37 },
     { buttonName: "up", buttonValue: 38 },
     { buttonName: "right", buttonValue: 39 },
-  ]
+  ];
 
   let player2Buttons = [
     { buttonName: "a", buttonValue: 65 },
     { buttonName: "w", buttonValue: 87 },
     { buttonName: "d", buttonValue: 68 },
-  ]
+  ];
 
-  let player1Key;
-  let player2Key;
+  let player1Key, player2Key;
 
-  let fragmentIndex;
-  let inverseIndex;
-
-  let drawArray = [];
+  let fragmentIndex, inverseIndex;
 
   let gridSize = [10, 6];
-
-
 
   let gameOver = false;
 
@@ -55,7 +49,7 @@
     document.addEventListener("keydown", handleKeyPress);
 
     // Blend mode
-    ctx.globalCompositeOperation = 'lighter';
+    //ctx.globalCompositeOperation = 'lighter';
 
     // Execute the draw function
     draw();
@@ -63,7 +57,12 @@
 
   // - Handle the key presses and draw triangles when the correct key is pressed
   const handleKeyPress = e => {
+    if (e.keyCode === 32) {
+      console.log(`opnieuw starten`);
+    }
+
     if (gameOver === false) {
+
       if (e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39) {
         if (e.keyCode === player1Key.buttonValue) {
           console.log(`Player 1: Juiste toets`);
@@ -122,9 +121,11 @@
     vertices = [];
     indices = [];
     fragments = [];
+    newFragments = [];
+    drawArray = [];
 
     ctx.fillStyle = 'rgb(0,0,0)'; // sets the color to fill in the rectangle with
-    console.log(`draw points`);
+    //console.log(`draw points`);
 
     // generate random points
     for (i = 0; i < gridSize[0] + 1; i++) {
@@ -184,14 +185,13 @@
 
   // -- Sort the triangles --
   const sortTriangles = fragments => {
-    console.log(`fragments in sort`, fragments);
+    //console.log(`fragments in sort`, fragments);
 
     newFragments = fragments.sort((a, b) => {
       //sort by x, secondary by y
       return a.centerPointX == b.centerPointX ? a.centerPointY - b.centerPointY : a.centerPointX - b.centerPointX;
     });
-    console.log(`NEW FRAGMENTS`, newFragments);
-
+    //console.log(`NEW FRAGMENTS`, newFragments);
 
   }
 
@@ -378,9 +378,27 @@
     drawRandomPoints();
   }
 
+  const drawGrid = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let x = 0; x < canvas.width; x += 120) {
+      for (let y = 0; y < canvas.height; y += 120) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(3840, y);
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, 1080);
+      }
+    }
+
+    ctx.lineWidth = 0.05;
+    ctx.strokeStyle = "#0054FF";
+    ctx.stroke();
+  }
+
   // -- Draw loop
   const draw = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawGrid();
 
     Object.keys(drawArray).forEach((item) => {
       drawArray[item].fragment[0].draw(drawArray[item].color);
