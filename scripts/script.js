@@ -55,7 +55,7 @@
     document.addEventListener("keydown", handleKeyPress);
 
     // Blend mode
-    //ctx.globalCompositeOperation = 'lighter';
+    ctx.globalCompositeOperation = 'lighter';
 
     // Execute the draw function
     draw();
@@ -242,40 +242,7 @@
     });
     console.log(`oude fragmnets`, fragments);
     console.log(`NEW FRAGMENTS`, newFragments);
-
   }
-
-  // -- Draw triangles with interval --
-  // const timeout = () => {
-  //   setTimeout(() => {
-
-  //     if (fragmentIndex >= inverseIndex + 1) {
-  //       console.log(`kapot`);
-  //       return;
-  //       gameOver = true;
-  //     }
-
-  //     if (fragmentIndex <= (fragments.length / 2)) {
-  //       let color = colorsPlayer1[Math.floor(Math.random() * colorsPlayer1.length)];
-  //       //console.log(fragmentIndex);
-  //       //newFragments[fragmentIndex].draw(color);
-  //       //drawQueuedShapes(drawArray);
-  //       //fadeIn(newFragments[fragmentIndex], color, 100);
-  //       fragmentIndex++;
-  //     }
-
-  //     if (inverseIndex >= (fragments.length / 2)) {
-  //       let color = colorsPlayer2[Math.floor(Math.random() * colorsPlayer2.length)];
-  //       //console.log(inverseIndex);
-  //       //newFragments[inverseIndex].draw(color);
-  //       //drawQueuedShapes(drawArray);
-  //       drawArray.push(newFragments)
-  //       //fadeIn(newFragments[inverseIndex], color, 100);
-  //       inverseIndex--;
-  //     }
-  //     timeout();
-  //   }, 20);
-  // }
 
   // -- Draw the triangles based on player input
   const drawTriangles = player => {
@@ -336,7 +303,7 @@
       if (this.visible === false) return;
 
       if (this.startOpacity <= 0.99) {
-        this.startOpacity += 0.03;
+        this.startOpacity += 0.04;
         Math.round(this.startOpacity * 100) / 100
       } else {
         this.startOpacity = 1;
@@ -344,13 +311,21 @@
 
       ctx.globalAlpha = this.startOpacity;
 
-      ctx.fillStyle = `hsla(${color})`; // sets the color to fill in the rectangle with
-      ctx.strokeStyle = `hsla(${color})`; // sets the color to fill in the rectangle with
+      ctx.fillStyle = `hsla(${color})`;
+      ctx.strokeStyle = `hsla(${color})`;
 
       //ctx.strokeStyle = `rgb(255, 255, 255)`; // sets the color to fill in the rectangle with
-      ctx.lineWidth = 3;
+      //ctx.lineWidth = 3;
+
+      // glow effect
+      // ctx.shadowColor = `rgba(255, 255, 255, 0.3)` // string
+      // ctx.shadowOffsetX = 0; // integer
+      // ctx.shadowOffsetY = 0; // integer
+      // ctx.shadowBlur = 30; // integer
 
       ctx.beginPath();
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
       ctx.moveTo(this.v0[0], this.v0[1]);
       ctx.lineTo(this.v0[0] + this.fillOffsetX1, this.v0[1] + this.fillOffsetY1);
       ctx.lineTo(this.v0[0] + this.fillOffsetX2, this.v0[1] + this.fillOffsetY2);
@@ -360,11 +335,22 @@
     }
 
     drawBg() {
-      backgroundCtx.fillStyle = `rgb(15, 15, 15)`; // sets the color to fill in the rectangle with
-      backgroundCtx.strokeStyle = `rgb(255, 255, 255)`; // sets the color to fill in the rectangle with
+
+      backgroundCtx.fillStyle = `rgb(15, 15, 15)`;
+      backgroundCtx.strokeStyle = `rgb(150, 150, 150)`;
       backgroundCtx.lineWidth = 3;
 
+      // glow effect
+      backgroundCtx.shadowColor = `rgba(255, 255, 255, 0.1)` // string
+      backgroundCtx.shadowOffsetX = 0; // integer
+      backgroundCtx.shadowOffsetY = 0; // integer
+      backgroundCtx.shadowBlur = 40; // integer
+
+
+
       backgroundCtx.beginPath();
+      backgroundCtx.lineCap = "round";
+      backgroundCtx.lineJoin = 'round';
       backgroundCtx.moveTo(this.v0[0], this.v0[1]);
       backgroundCtx.lineTo(this.v0[0] + this.fillOffsetX1, this.v0[1] + this.fillOffsetY1);
       backgroundCtx.lineTo(this.v0[0] + this.fillOffsetX2, this.v0[1] + this.fillOffsetY2);
