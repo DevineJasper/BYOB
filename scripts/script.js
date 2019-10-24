@@ -3,6 +3,9 @@
   const canvas = document.getElementById('c');
   const ctx = canvas.getContext('2d');
 
+  const backgroundCanvas = document.getElementById('c2');
+  const backgroundCtx = backgroundCanvas.getContext('2d');
+
   let vertices = [],
     indices = [],
     fragments = [],
@@ -37,6 +40,9 @@
   const init = () => {
     document.addEventListener(`click`, handleClick);
 
+    //drawGrid();
+
+
     // Draw the random points
     drawRandomPoints();
     generateColors();
@@ -70,8 +76,15 @@
 
           // TEKEN HIER HET VOLGENDE DEELTJE
           drawTriangles(1);
-
           fragmentIndex++;
+          drawTriangles(1);
+          fragmentIndex++;
+          drawTriangles(1);
+          fragmentIndex++;
+
+
+
+
 
         } else {
           console.log(`Player 1: FOUT!!!`);
@@ -85,7 +98,13 @@
 
           // TEKEN HIER HET VOLGENDE DEELTJE
           drawTriangles(2);
+          inverseIndex--;
 
+          //   setTimeout(() => {
+
+          drawTriangles(2);
+          inverseIndex--;
+          drawTriangles(2);
           inverseIndex--;
 
         } else {
@@ -94,6 +113,17 @@
       }
     }
   }
+
+  var x = 0;
+  var intervalID = setInterval(function () {
+
+    // Your logic here
+    console.log(`cleartest`);
+
+    if (++x === 5) {
+      window.clearInterval(intervalID);
+    }
+  }, 20);
 
   const getPlayerKey = player => {
     // Pick a random key for each player
@@ -161,6 +191,8 @@
     // Calculate starting points of both sides
     fragmentIndex = 0;
     inverseIndex = fragments.length - 1;
+    drawGrid();
+
   }
 
   // -- Generate the colors --
@@ -191,6 +223,7 @@
       //sort by x, secondary by y
       return a.centerPointX == b.centerPointX ? a.centerPointY - b.centerPointY : a.centerPointX - b.centerPointX;
     });
+
     //console.log(`NEW FRAGMENTS`, newFragments);
 
   }
@@ -225,63 +258,6 @@
   //     }
   //     timeout();
   //   }, 20);
-  // }
-
-  // const fadeIn = (fragment, color, initialColor, opacity) => {
-  //   let steps = 100;
-  //   let initialColorTest = initialColor;
-  //   console.log(`LUMINANCE`, initialColorTest[2]);
-  //   let startValue = 100;
-  //   // let h = 0,
-  //   //   s = '0%',
-  //   //   l = `100%`;
-  //   console.log(color);
-  //   let timeOut;
-  //   timeOut = setTimeout(() => {
-  //     // if (fragmentIndex >= inverseIndex + 1) {
-  //     //   console.log(`kapot`);
-  //     //   return;
-  //     //   gameOver = true;
-  //     // }
-
-  //     if (startValue >= initialColor) {
-  //       //fragment.draw(color);
-  //       let newColor = color[2].replace(/%/g, "");
-  //       console.log(`gesliced kleur`, newColor);
-  //       parseFloat(newColor);
-  //       startValue -= 1;
-  //       newColor = `${newColor}%`;
-  //       console.log(`new new color`, newColor);
-  //       //fragment.draw([h, s, l, opacity]);
-  //       //console.log(`OPACITY`, opacity);
-  //       //fadeIn(fragment, color, initialColorTest, opacity);
-  //     } else {
-  //       console.log(`BANAAAN`);
-  //       fragment.draw(color);
-  //       clearTimeout(timeOut);
-  //     }
-  //   }, 100);
-
-  // }
-  // const fadeIn = (fragment, color, initialValue) => {
-  //   let timeOut;
-  //   let drawColor;
-  //   console.log(`fragment`, fragment);
-  //   console.log(`color`, color);
-  //   console.log(`initialvalue`, initialValue);
-  //   let currentLuminanceValue = color[2].replace(/%/g, "");
-  //   parseFloat(currentLuminanceValue);
-  //   timeOut = setTimeout(() => {
-  //     if (initialValue >= currentLuminanceValue) {
-  //       let drawColor = [color[0], color[1], `${initialValue}%`, color[3]];
-  //       //drawColor = `${newColor}%`;
-  //       //fragment.draw(drawColor);
-  //       initialValue -= 3;
-  //       //console.log(`deze if werkt man`);
-  //       drawArray.push({ fragment: fragment, color: drawColor });
-  //       fadeIn(fragment, color, initialValue);
-  //     }
-  //   }, 1);
   // }
 
   // -- Draw the triangles based on player input
@@ -354,7 +330,6 @@
       ctx.fillStyle = `hsla(${color})`; // sets the color to fill in the rectangle with
       ctx.strokeStyle = `hsla(${color})`; // sets the color to fill in the rectangle with
 
-
       //ctx.strokeStyle = `rgb(255, 255, 255)`; // sets the color to fill in the rectangle with
       ctx.lineWidth = 3;
 
@@ -365,6 +340,26 @@
       ctx.closePath();
       ctx.stroke();
       ctx.fill();
+    }
+
+    drawBg() {
+      //ctx.fillStyle = `rgb(${color})`; // sets the color to fill in the rectangle with
+      console.log(`drawBg functie`);
+
+      ctx.fillStyle = `rgb(30, 30, 30)`; // sets the color to fill in the rectangle with
+      ctx.strokeStyle = `rgb(255, 255, 255)`; // sets the color to fill in the rectangle with
+      ctx.lineWidth = 3;
+
+      ctx.beginPath();
+      ctx.moveTo(this.v0[0], this.v0[1]);
+      ctx.lineTo(this.v0[0] + this.fillOffsetX1, this.v0[1] + this.fillOffsetY1);
+      ctx.lineTo(this.v0[0] + this.fillOffsetX2, this.v0[1] + this.fillOffsetY2);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.fill();
+      console.log(`wollah`);
+
+
     }
   }
 
@@ -379,26 +374,34 @@
   }
 
   const drawGrid = () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (let x = 0; x < canvas.width; x += 120) {
-      for (let y = 0; y < canvas.height; y += 120) {
-        ctx.moveTo(0, y);
-        ctx.lineTo(3840, y);
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, 1080);
-      }
-    }
+    //ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // for (let x = 0; x < canvas.width; x += 120) {
+    //   for (let y = 0; y < canvas.height; y += 120) {
+    //     backgroundCtx.moveTo(0, y);
+    //     backgroundCtx.lineTo(3840, y);
+    //     backgroundCtx.moveTo(x, 0);
+    //     backgroundCtx.lineTo(x, 1080);
+    //   }
+    // }
 
-    ctx.lineWidth = 0.05;
-    ctx.strokeStyle = "#0054FF";
-    ctx.stroke();
+    // backgroundCtx.lineWidth = 0.05;
+    // backgroundCtx.strokeStyle = "#0054FF";
+    // backgroundCtx.stroke();
+
+    // console.log(`test`);
+    // console.log(newFragments);
+
+    // fragments.forEach(fragment => {
+    //   console.log(fragment);
+    //   fragment.drawBg();
+    // })
+
+    //console.log(fragments.fragmentIndex);
   }
 
   // -- Draw loop
   const draw = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    drawGrid();
 
     Object.keys(drawArray).forEach((item) => {
       drawArray[item].fragment[0].draw(drawArray[item].color);
