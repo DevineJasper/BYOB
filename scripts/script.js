@@ -51,11 +51,11 @@
     getPlayerKey(1);
     getPlayerKey(2);
 
-
     // Handle keydown events
     document.addEventListener("keydown", handleKeyPress);
 
-    //ctx.context.globalCompositeOperation = 'lighter';
+    // Blend mode
+    ctx.globalCompositeOperation = 'lighter';
 
     // Execute the draw function
     draw();
@@ -63,7 +63,6 @@
 
   // - Handle the key presses and draw triangles when the correct key is pressed
   const handleKeyPress = e => {
-    console.log(`test`);
     if (gameOver === false) {
       if (e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39) {
         if (e.keyCode === player1Key.buttonValue) {
@@ -290,23 +289,18 @@
 
     if (fragmentIndex >= inverseIndex + 1) {
       console.log(`STOP`);
-      return;
       gameOver = true;
+      return;
     }
 
     if (player === 1) {
       let color = colorsPlayer1[Math.floor(Math.random() * colorsPlayer1.length)];
-
-      console.log(`Fragmentindex`, fragmentIndex);
-      //newFragments[fragmentIndex].draw(color);
       drawArray.push({ fragment: [newFragments[fragmentIndex]], color: color });
 
     }
 
     if (player === 2) {
       let color = colorsPlayer2[Math.floor(Math.random() * colorsPlayer2.length)];
-      console.log(`inverseIndex`, inverseIndex);
-      //newFragments[inverseIndex].draw(color);
       drawArray.push({ fragment: [newFragments[inverseIndex]], color: color });
     }
   }
@@ -320,6 +314,7 @@
       this.centerpointX = 0;
       this.centerpointY = 0;
 
+      this.startOpacity = 0;
 
       this.fillOffsetX1 = 0;
       this.fillOffsetY1 = 0;
@@ -342,16 +337,26 @@
     calculateCenters() {
       this.centerPointX = (this.tri[0][0] + this.tri[1][0] + this.tri[2][0]) / 3;
       this.centerPointY = (this.tri[0][1] + this.tri[1][1] + this.tri[2][1]) / 3;
-
     }
 
     draw(color) {
       if (this.visible === false) return;
 
+      if (this.startOpacity <= 0.99) {
+        this.startOpacity += 0.05;
+        Math.round(this.startOpacity * 100) / 100
+      } else {
+        this.startOpacity = 1;
+      }
+
+      ctx.globalAlpha = this.startOpacity;
+
       ctx.fillStyle = `hsla(${color})`; // sets the color to fill in the rectangle with
       ctx.strokeStyle = `hsla(${color})`; // sets the color to fill in the rectangle with
+
+
       //ctx.strokeStyle = `rgb(255, 255, 255)`; // sets the color to fill in the rectangle with
-      //ctx.lineWidth = 3;
+      ctx.lineWidth = 3;
 
       ctx.beginPath();
       ctx.moveTo(this.v0[0], this.v0[1]);
@@ -363,47 +368,25 @@
     }
   }
 
+  // - Calculate a random range between two numbers
   const randomRange = (min, max) => {
     return min + Math.random() * (max - min);
   }
 
+  // - Generate new points on click
   const handleClick = () => {
     drawRandomPoints();
   }
 
-  const drawQueuedShapes = shapes => {
-    //console.log(`ik test de queue functie`);
-  }
-
+  // -- Draw loop
   const draw = () => {
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     Object.keys(drawArray).forEach((item) => {
-      //console.log(`key`, item); // key
-      //console.log(`value`, drawArray[item]); // value
-
-      //console.log(drawArray[item].fragment[0].centerPointX);
-
       drawArray[item].fragment[0].draw(drawArray[item].color);
     });
 
-    // drawArray.forEach(fragment => {
-    //   fragment.
-    // })
-
-    //console.log(`drawArray`, drawArray);
-
     requestAnimationFrame(draw);
-
-  }
-
-  var lastLoop = new Date();
-  function gameLoop() {
-    var thisLoop = new Date();
-    var fps = 1000 / (thisLoop - lastLoop);
-    lastLoop = thisLoop;
-    console.log(fps);
   }
 
   init();
