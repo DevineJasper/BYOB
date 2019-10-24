@@ -74,13 +74,12 @@
           console.log(`Player 1: Juiste toets`);
           getPlayerKey(1);
 
-          // TEKEN HIER HET VOLGENDE DEELTJE
-          drawTriangles(1);
-          fragmentIndex++;
-          drawTriangles(1);
-          fragmentIndex++;
-          drawTriangles(1);
-          fragmentIndex++;
+          setIntervalX(function () {
+            drawTriangles(1);
+            fragmentIndex++;
+            console.log(`aantal triangles test`);
+          }, 100, 2);
+
 
 
 
@@ -96,16 +95,11 @@
           console.log(`Player 2: Juiste toets`);
           getPlayerKey(2);
 
-          // TEKEN HIER HET VOLGENDE DEELTJE
-          drawTriangles(2);
-          inverseIndex--;
+          setIntervalX(() => {
+            drawTriangles(2);
+            inverseIndex--;
+          }, 100, 2);
 
-          //   setTimeout(() => {
-
-          drawTriangles(2);
-          inverseIndex--;
-          drawTriangles(2);
-          inverseIndex--;
 
         } else {
           console.log(`Player 2: FOUT!!!`);
@@ -114,16 +108,18 @@
     }
   }
 
-  var x = 0;
-  var intervalID = setInterval(function () {
+  const setIntervalX = (callback, delay, repetitions) => {
+    let x = 0;
+    let intervalID = window.setInterval(() => {
 
-    // Your logic here
-    console.log(`cleartest`);
+      callback();
 
-    if (++x === 5) {
-      window.clearInterval(intervalID);
-    }
-  }, 20);
+      if (++x === repetitions) {
+        window.clearInterval(intervalID);
+      }
+    }, delay);
+  }
+
 
   const getPlayerKey = player => {
     // Pick a random key for each player
@@ -154,17 +150,38 @@
     newFragments = [];
     drawArray = [];
 
-    ctx.fillStyle = 'rgb(0,0,0)'; // sets the color to fill in the rectangle with
-    //console.log(`draw points`);
-
-    // generate random points
-    for (i = 0; i < gridSize[0] + 1; i++) {
-      for (j = 0; j < gridSize[1] + 1; j++) {
+    // generate random points INSIDE the canvas
+    for (i = 1; i < gridSize[0]; i++) {
+      for (j = 1; j < gridSize[1]; j++) {
         vertices.push([
           i * canvas.width / gridSize[0] + randomRange(-150, 150),
           j * canvas.height / gridSize[1] + randomRange(-150, 150)
         ]);
       }
+    }
+
+    // Draw points along top and bottom side
+    for (i = 1; i < gridSize[0]; i++) {
+      vertices.push([
+        i * canvas.width / gridSize[0] + randomRange(-150, 150),
+        0
+      ])
+      vertices.push([
+        i * canvas.width / gridSize[0] + randomRange(-150, 150),
+        canvas.height
+      ])
+    }
+
+    // Draw points along top and bottom side
+    for (j = 1; j < gridSize[1]; j++) {
+      vertices.push([
+        0,
+        j * canvas.height / gridSize[1] + randomRange(-150, 150)
+      ])
+      vertices.push([
+        canvas.width,
+        j * canvas.height / gridSize[1] + randomRange(-150, 150)
+      ])
     }
 
     // draw corner points
@@ -192,7 +209,6 @@
     fragmentIndex = 0;
     inverseIndex = fragments.length - 1;
     drawGrid();
-
   }
 
   // -- Generate the colors --
@@ -217,14 +233,15 @@
 
   // -- Sort the triangles --
   const sortTriangles = fragments => {
-    //console.log(`fragments in sort`, fragments);
+    console.log(`fragments voor sort`, fragments);
+
 
     newFragments = fragments.sort((a, b) => {
       //sort by x, secondary by y
       return a.centerPointX == b.centerPointX ? a.centerPointY - b.centerPointY : a.centerPointX - b.centerPointX;
     });
-
-    //console.log(`NEW FRAGMENTS`, newFragments);
+    console.log(`oude fragmnets`, fragments);
+    console.log(`NEW FRAGMENTS`, newFragments);
 
   }
 
@@ -287,8 +304,8 @@
       this.v1 = v1;
       this.v2 = v2;
       this.tri = [v0, v1, v2];
-      this.centerpointX = 0;
-      this.centerpointY = 0;
+      this.centerPointX = 0;
+      this.centerPointY = 0;
 
       this.startOpacity = 0;
 
@@ -319,7 +336,7 @@
       if (this.visible === false) return;
 
       if (this.startOpacity <= 0.99) {
-        this.startOpacity += 0.05;
+        this.startOpacity += 0.03;
         Math.round(this.startOpacity * 100) / 100
       } else {
         this.startOpacity = 1;
@@ -343,23 +360,17 @@
     }
 
     drawBg() {
-      //ctx.fillStyle = `rgb(${color})`; // sets the color to fill in the rectangle with
-      console.log(`drawBg functie`);
+      backgroundCtx.fillStyle = `rgb(15, 15, 15)`; // sets the color to fill in the rectangle with
+      backgroundCtx.strokeStyle = `rgb(255, 255, 255)`; // sets the color to fill in the rectangle with
+      backgroundCtx.lineWidth = 3;
 
-      ctx.fillStyle = `rgb(30, 30, 30)`; // sets the color to fill in the rectangle with
-      ctx.strokeStyle = `rgb(255, 255, 255)`; // sets the color to fill in the rectangle with
-      ctx.lineWidth = 3;
-
-      ctx.beginPath();
-      ctx.moveTo(this.v0[0], this.v0[1]);
-      ctx.lineTo(this.v0[0] + this.fillOffsetX1, this.v0[1] + this.fillOffsetY1);
-      ctx.lineTo(this.v0[0] + this.fillOffsetX2, this.v0[1] + this.fillOffsetY2);
-      ctx.closePath();
-      ctx.stroke();
-      ctx.fill();
-      console.log(`wollah`);
-
-
+      backgroundCtx.beginPath();
+      backgroundCtx.moveTo(this.v0[0], this.v0[1]);
+      backgroundCtx.lineTo(this.v0[0] + this.fillOffsetX1, this.v0[1] + this.fillOffsetY1);
+      backgroundCtx.lineTo(this.v0[0] + this.fillOffsetX2, this.v0[1] + this.fillOffsetY2);
+      backgroundCtx.closePath();
+      backgroundCtx.stroke();
+      backgroundCtx.fill();
     }
   }
 
@@ -374,7 +385,8 @@
   }
 
   const drawGrid = () => {
-    //ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     // for (let x = 0; x < canvas.width; x += 120) {
     //   for (let y = 0; y < canvas.height; y += 120) {
     //     backgroundCtx.moveTo(0, y);
@@ -391,10 +403,9 @@
     // console.log(`test`);
     // console.log(newFragments);
 
-    // fragments.forEach(fragment => {
-    //   console.log(fragment);
-    //   fragment.drawBg();
-    // })
+    fragments.forEach(fragment => {
+      fragment.drawBg();
+    })
 
     //console.log(fragments.fragmentIndex);
   }
