@@ -5,7 +5,9 @@
 
   let vertices = [],
     indices = [],
-    fragments = [];
+    fragments = [],
+    centers = [],
+    newFragments = [];
 
   let colorsPlayer1 = [],
     colorsPlayer2 = [];
@@ -27,6 +29,7 @@
 
   let fragmentIndex;
   let inverseIndex;
+
 
   let gameOver = false;
 
@@ -111,35 +114,42 @@
 
     ctx.fillStyle = 'rgb(0,0,0)'; // sets the color to fill in the rectangle with
     console.log(`draw points`);
-    for (i = 0; i < 10; i++) {
-      console.log(`points`);
+    // for (i = 0; i < 100; i++) {
+    //   console.log(`points`);
+    //   vertices.push([Math.floor(Math.random() * canvas.width), Math.floor(Math.random() * canvas.height)]);
+    // }
 
-      vertices.push([Math.floor(Math.random() * 3840), Math.floor(Math.random() * 1080)]);
-
+    for (i = 0; i < 21; i++) {
+      for (j = 0; j < 13; j++) {
+        vertices.push([
+          i * 192 + randomRange(-150, 150),
+          j * 90 + randomRange(-150, 150)
+        ]);
+      }
     }
 
-    // vertical
-    for (i = 0; i < 10; i++) {
-      console.log(`points`);
+    // // vertical
+    // for (i = 0; i < 10; i++) {
+    //   console.log(`points`);
 
-      vertices.push([0, Math.floor(Math.random() * 3840)]);
-      vertices.push([3840, Math.floor(Math.random() * 3840)]);
-    }
+    //   vertices.push([0, Math.floor(Math.random() * canvas.width)]);
+    //   vertices.push([3840, Math.floor(Math.random() * canvas.width)]);
+    // }
 
-    // horizontal
-    for (i = 0; i < 20; i++) {
-      vertices.push([Math.floor(Math.random() * 3840), 0]);
-      vertices.push([Math.floor(Math.random() * 3840), 1080]);
+    // // horizontal
+    // for (i = 0; i < 20; i++) {
+    //   vertices.push([Math.floor(Math.random() * canvas.width), 0]);
+    //   vertices.push([Math.floor(Math.random() * canvas.width), canvas.height]);
 
 
-      console.log(`points`);
-    }
+    //   console.log(`points`);
+    // }
 
     // draw corner points
     vertices.push([0, 0]);
-    vertices.push([3840, 0]);
-    vertices.push([3840, 1080]);
-    vertices.push([0, 1080]);
+    vertices.push([canvas.width, 0]);
+    vertices.push([canvas.width, canvas.height]);
+    vertices.push([0, canvas.height]);
 
 
     console.log(`vertices`, vertices);
@@ -155,10 +165,28 @@
         vertices[indices[i + 1]],
         vertices[indices[i + 2]]
       ));
+
+      // centers.push([new Fragment(
+      //   vertices[indices[i + 0]],
+      //   vertices[indices[i + 1]],
+      //   vertices[indices[i + 2]]
+      // ),
+      // (vertices[indices[i + 0][0]] + vertices[indices[i + 1][0]] + vertices[indices[i + 2][0]]) / 3])
     }
+
+    // fragments.forEach(fragment => {
+    //   console.log(`tri`, fragment.tri);
+    //   centers.push[]
+    // })
+
+    sortTriangles(fragments);
+
+    console.log(`FRAGMENTS`, fragments);
+    console.log(`Centerpoints`, centers);
 
 
     for (let i = 0; i < 18; i++) {
+      // 59
       let h = 237,
         s = '100%',
         l = `${randomRange(20, 40)}%`;
@@ -166,6 +194,7 @@
     }
 
     for (let i = 0; i < 18; i++) {
+      // 123
       let h = 303,
         s = '100%',
         l = `${randomRange(20, 40)}%`;
@@ -175,34 +204,77 @@
     fragmentIndex = 0;
     inverseIndex = fragments.length - 1;
 
+    timeout();
+
+  }
+
+  const sortTriangles = fragments => {
+    console.log(`fragments in sort`, fragments);
+
+
+
+    newFragments = fragments.sort((a, b) => {
+      //sort by x, secondary by y
+      return a.centerPointX == b.centerPointX ? a.centerPointY - b.centerPointY : a.centerPointX - b.centerPointX;
+    });
+    console.log(`NEW FRAGMENTS`, newFragments);
+
+
+  }
+
+  const timeout = () => {
+    setTimeout(() => {
+
+
+      if (fragmentIndex >= inverseIndex + 1) {
+        console.log(`kapot`);
+        return;
+        gameOver = true;
+      }
+
+      if (fragmentIndex <= (fragments.length / 2)) {
+        let color = colorsPlayer1[Math.floor(Math.random() * colorsPlayer1.length)];
+
+        //console.log(fragmentIndex);
+        newFragments[fragmentIndex].draw(color);
+        fragmentIndex++;
+      }
+
+      if (inverseIndex >= (fragments.length / 2)) {
+        let color = colorsPlayer2[Math.floor(Math.random() * colorsPlayer2.length)];
+
+        //console.log(inverseIndex);
+        newFragments[inverseIndex].draw(color);
+        inverseIndex--;
+      }
+      timeout();
+    }, 40);
   }
 
   const drawTriangles = player => {
 
-    // console.log(`testman`);
-    // console.log(fragmentIndex);
-    // console.log(inverseIndex);
+    // timeout();
 
-    if (fragmentIndex >= inverseIndex + 1) {
-      console.log(`kapot`);
-      return;
-      gameOver = true;
-    }
+    // if (fragmentIndex >= inverseIndex + 1) {
+    //   console.log(`kapot`);
+    //   return;
+    //   gameOver = true;
+    // }
 
-    if (player === 1) {
-      let color = colorsPlayer1[Math.floor(Math.random() * colorsPlayer1.length)];
+    // if (player === 1) {
+    //   let color = colorsPlayer1[Math.floor(Math.random() * colorsPlayer1.length)];
 
-      console.log(`Fragmentindex`, fragmentIndex);
-      fragments[fragmentIndex].draw(color);
+    //   console.log(`Fragmentindex`, fragmentIndex);
+    //   newFragments[fragmentIndex].draw(color);
 
-    }
+    // }
 
-    if (player === 2) {
-      let color = colorsPlayer2[Math.floor(Math.random() * colorsPlayer2.length)];
-      console.log(`inverseIndex`, inverseIndex);
-      fragments[inverseIndex].draw(color);
+    // if (player === 2) {
+    //   let color = colorsPlayer2[Math.floor(Math.random() * colorsPlayer2.length)];
+    //   console.log(`inverseIndex`, inverseIndex);
+    //   newFragments[inverseIndex].draw(color);
 
-    }
+    // }
   }
 
   class Fragment {
@@ -211,16 +283,19 @@
       this.v1 = v1;
       this.v2 = v2;
       this.tri = [v0, v1, v2];
+      this.centerpointX = 0;
+      this.centerpointY = 0;
+
 
       this.fillOffsetX1 = 0;
       this.fillOffsetY1 = 0;
       this.fillOffsetX2 = 0;
       this.fillOffsetY2 = 0;
 
-      this.mouseOver = false;
       this.visible = true;
 
       this.calculateDeltas();
+      this.calculateCenters();
     }
 
     calculateDeltas() {
@@ -230,11 +305,19 @@
       this.fillOffsetY2 = this.v2[1] - this.v0[1];
     }
 
+    calculateCenters() {
+      this.centerPointX = (this.tri[0][0] + this.tri[1][0] + this.tri[2][0]) / 3;
+      this.centerPointY = (this.tri[0][1] + this.tri[1][1] + this.tri[2][1]) / 3;
+
+    }
+
     draw(color) {
       if (this.visible === false) return;
 
       ctx.fillStyle = `hsl(${color})`; // sets the color to fill in the rectangle with
       ctx.strokeStyle = `hsl(${color})`; // sets the color to fill in the rectangle with
+      // ctx.lineWidth = 10;
+
 
 
       ctx.beginPath();
