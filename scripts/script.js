@@ -35,6 +35,13 @@
 
   let gameOver = false;
 
+  let offset = 0;
+
+  let offsetSweep = true;
+
+  let curve = []
+
+
 
 
   const init = () => {
@@ -51,11 +58,12 @@
     getPlayerKey(1);
     getPlayerKey(2);
 
+    easeInOutQuad();
     // Handle keydown events
     document.addEventListener("keydown", handleKeyPress);
 
     // Blend mode
-    ctx.globalCompositeOperation = 'lighter';
+    //ctx.globalCompositeOperation = 'lighter';
 
     // Execute the draw function
     draw();
@@ -283,7 +291,7 @@
 
       this.visible = true;
 
-      this.calculateDeltas();
+      //this.calculateDeltas();
       this.calculateCenters();
     }
 
@@ -314,6 +322,8 @@
       ctx.fillStyle = `hsla(${color})`;
       ctx.strokeStyle = `hsla(${color})`;
 
+      ctx.lineWidth = 3;
+
       //ctx.strokeStyle = `rgb(255, 255, 255)`; // sets the color to fill in the rectangle with
       //ctx.lineWidth = 3;
 
@@ -327,8 +337,10 @@
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
       ctx.moveTo(this.v0[0], this.v0[1]);
-      ctx.lineTo(this.v0[0] + this.fillOffsetX1, this.v0[1] + this.fillOffsetY1);
-      ctx.lineTo(this.v0[0] + this.fillOffsetX2, this.v0[1] + this.fillOffsetY2);
+      ctx.lineTo(this.v1[0], this.v1[1]);
+      ctx.lineTo(this.v2[0], this.v2[1]);
+      // ctx.lineTo(this.v0[0] + this.fillOffsetX1, this.v0[1] + this.fillOffsetY1);
+      // ctx.lineTo(this.v0[0] + this.fillOffsetX2, this.v0[1] + this.fillOffsetY2);
       ctx.closePath();
       ctx.stroke();
       ctx.fill();
@@ -341,19 +353,19 @@
       backgroundCtx.lineWidth = 3;
 
       // glow effect
-      backgroundCtx.shadowColor = `rgba(255, 255, 255, 0.1)` // string
-      backgroundCtx.shadowOffsetX = 0; // integer
-      backgroundCtx.shadowOffsetY = 0; // integer
-      backgroundCtx.shadowBlur = 40; // integer
-
-
+      // backgroundCtx.shadowColor = `rgba(255, 255, 255, 0.1)` // string
+      // backgroundCtx.shadowOffsetX = 0; // integer
+      // backgroundCtx.shadowOffsetY = 0; // integer
+      // backgroundCtx.shadowBlur = 40; // integer
 
       backgroundCtx.beginPath();
       backgroundCtx.lineCap = "round";
       backgroundCtx.lineJoin = 'round';
       backgroundCtx.moveTo(this.v0[0], this.v0[1]);
-      backgroundCtx.lineTo(this.v0[0] + this.fillOffsetX1, this.v0[1] + this.fillOffsetY1);
-      backgroundCtx.lineTo(this.v0[0] + this.fillOffsetX2, this.v0[1] + this.fillOffsetY2);
+      backgroundCtx.lineTo(this.v1[0], this.v1[1]);
+      backgroundCtx.lineTo(this.v2[0], this.v2[1]);
+      // backgroundCtx.lineTo(this.v0[0] + this.fillOffsetX1, this.v0[1] + this.fillOffsetY1);
+      // backgroundCtx.lineTo(this.v0[0] + this.fillOffsetX2, this.v0[1] + this.fillOffsetY2);
       backgroundCtx.closePath();
       backgroundCtx.stroke();
       backgroundCtx.fill();
@@ -368,11 +380,12 @@
   // - Generate new points on click
   const handleClick = () => {
     drawRandomPoints();
+    gameOver = false;
   }
 
   const drawGrid = () => {
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    backgroundCtx.clearRect(0, 0, canvas.width, canvas.height);
     // for (let x = 0; x < canvas.width; x += 120) {
     //   for (let y = 0; y < canvas.height; y += 120) {
     //     backgroundCtx.moveTo(0, y);
@@ -389,16 +402,76 @@
     // console.log(`test`);
     // console.log(newFragments);
 
+    if (offsetSweep === true) {
+      if (offset < 119) {
+        //console.log(`looptest broo`);
+
+        offset += 1;
+        //console.log(curve[offset]);
+
+
+        //console.log(`tweede test broer`);
+      } else {
+        offsetSweep = false;
+      }
+    }
+
+    if (offsetSweep === false) {
+
+      if (offset > 0) {
+        //console.log(`looptest`);
+        offset -= 1;
+
+        //console.log(curve[offset]);
+
+      } else {
+        offsetSweep = true;
+      }
+    }
+
+    //console.log(offsetX);
+
+
     fragments.forEach(fragment => {
+
+      if (fragment.v0[0] === 0 || fragment.v1[0] === 0 || fragment.v2[0] === 0 || fragment.v0[1] === 0 || fragment.v1[1] === 0 || fragment.v2[1] === 0 || fragment.v0[0] === canvas.width || fragment.v1[0] === canvas.width || fragment.v2[0] === canvas.width || fragment.v0[1] === canvas.height || fragment.v1[1] === canvas.height || fragment.v2[1] === canvas.height) {
+      } else {
+        fragment.v0[0] = fragment.v0[0] + (curve[offset] / 1920);
+        fragment.v0[1] = fragment.v0[1] + (curve[offset] / 1920);
+        fragment.v1[0] = fragment.v1[0] + (curve[offset] / 1920);
+        fragment.v1[1] = fragment.v1[1] + (curve[offset] / 1920);
+        fragment.v2[0] = fragment.v2[0] + (curve[offset] / 1920);
+        fragment.v2[1] = fragment.v2[1] + (curve[offset] / 1920);
+      }
+
       fragment.drawBg();
     })
 
     //console.log(fragments.fragmentIndex);
   }
 
+  const easeInOutQuad = (t, b, c, d) => {
+    t /= d / 2;
+    if (t < 1) return c / 2 * t * t + b;
+    t--;
+    return -c / 2 * (t * (t - 2) - 1) + b;
+    //return -c / 2 * (Math.cos(Math.PI * t / d) - 1) + b;
+  };
+
+  var steps = 120
+  var speed = 1
+  for (var i = 0; i < steps; i++) {
+    var stepValue = easeInOutQuad(i, 0, speed * steps, steps);
+    curve.push(stepValue - 60);
+  }
+
+  console.log(curve); // [0, 50, 200, 350, 400]
+
   // -- Draw loop
   const draw = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawGrid();
 
     Object.keys(drawArray).forEach((item) => {
       drawArray[item].fragment[0].draw(drawArray[item].color);
