@@ -9,11 +9,14 @@
   let vertices = [],
     indices = [],
     fragments = [],
-    newFragments = [],
-    drawArray = [];
+    newFragments = [];
 
   let colorsPlayer1 = [],
-    colorsPlayer2 = [];
+    colorsPlayer2 = [],
+    blueTriangles = [],
+    pinkTriangles = [],
+    newBlueArray = [],
+    newPinkArray = [];
 
   let player1Buttons = [
     { buttonName: "left", buttonValue: 37 },
@@ -29,11 +32,12 @@
 
   let player1Key, player2Key;
 
-  let fragmentIndex, inverseIndex;
+  let fragmentIndex, inverseIndex, sweepIndexLeft, sweepIndexRight;
 
   let gridSize = [10, 6];
 
   let gameOver = false;
+  let colorTriggered = false;
 
   let offset = 0;
 
@@ -63,7 +67,7 @@
     document.addEventListener("keydown", handleKeyPress);
 
     // Blend mode
-    //ctx.globalCompositeOperation = 'lighter';
+    ctx.globalCompositeOperation = 'lighter';
 
     // Execute the draw function
     draw();
@@ -82,15 +86,19 @@
           console.log(`Player 1: Juiste toets`);
           getPlayerKey(1);
 
-          setIntervalX(function () {
-            drawTriangles(1);
-            fragmentIndex++;
-            console.log(`aantal triangles test`);
+          setIntervalX(() => {
+
+            if (gameOver === false) {
+              drawTriangles(1);
+              fragmentIndex++;
+            } else {
+              console.log(`STOP`);
+            }
+
+            console.log(fragmentIndex);
+            console.log(inverseIndex);
+
           }, 100, 2);
-
-
-
-
 
 
         } else {
@@ -104,8 +112,13 @@
           getPlayerKey(2);
 
           setIntervalX(() => {
-            drawTriangles(2);
-            inverseIndex--;
+
+            if (gameOver === false) {
+              drawTriangles(2);
+              inverseIndex--;
+            } else {
+              console.log(`STOP`);
+            }
           }, 100, 2);
 
 
@@ -127,7 +140,6 @@
       }
     }, delay);
   }
-
 
   const getPlayerKey = player => {
     // Pick a random key for each player
@@ -152,11 +164,6 @@
     ctx.clearRect(0, 0, 3840, 1080);
 
     // clear the arrays for the vertices, indices and fragments of the triangles;
-    vertices = [];
-    indices = [];
-    fragments = [];
-    newFragments = [];
-    drawArray = [];
 
     // generate random points INSIDE the canvas
     for (i = 1; i < gridSize[0]; i++) {
@@ -215,28 +222,29 @@
 
     // Calculate starting points of both sides
     fragmentIndex = 0;
-    inverseIndex = fragments.length - 1;
+    inverseIndex = fragments.length;
     drawGrid();
   }
 
   // -- Generate the colors --
   const generateColors = () => {
 
-    for (let i = 0; i < 18; i++) {
+    for (let i = 0; i < 5; i++) {
       let h = 237,
         s = '100%',
-        l = `${Math.round(randomRange(20, 40))}%`,
+        l = `${20 + i * 4}%`,
         a = 1;
       colorsPlayer1.push([h, s, l, a]);
     }
 
-    for (let i = 0; i < 18; i++) {
+    for (let i = 0; i < 5; i++) {
       let h = 303,
         s = '100%',
-        l = `${Math.round(randomRange(20, 40))}%`,
+        l = `${20 + i * 4}%`,
         a = 1;
       colorsPlayer2.push([h, s, l, a]);
     }
+    // l = `${Math.round(randomRange(20, 40))}%`,
   }
 
   // -- Sort the triangles --
@@ -244,7 +252,7 @@
     console.log(`fragments voor sort`, fragments);
 
 
-    newFragments = fragments.sort((a, b) => {
+    fragments.sort((a, b) => {
       //sort by x, secondary by y
       return a.centerPointX == b.centerPointX ? a.centerPointY - b.centerPointY : a.centerPointX - b.centerPointX;
     });
@@ -255,21 +263,17 @@
   // -- Draw the triangles based on player input
   const drawTriangles = player => {
 
-    if (fragmentIndex >= inverseIndex + 1) {
-      console.log(`STOP`);
-      gameOver = true;
-      return;
-    }
-
     if (player === 1) {
       let color = colorsPlayer1[Math.floor(Math.random() * colorsPlayer1.length)];
-      drawArray.push({ fragment: [newFragments[fragmentIndex]], color: color });
-
+      blueTriangles.push({ fragment: [fragments[fragmentIndex]], color: color });
+      //blueTriangles.push(fragments[fragmentIndex]);
     }
 
     if (player === 2) {
       let color = colorsPlayer2[Math.floor(Math.random() * colorsPlayer2.length)];
-      drawArray.push({ fragment: [newFragments[inverseIndex]], color: color });
+      pinkTriangles.push({ fragment: [fragments[inverseIndex - 1]], color: color });
+      //pinkTriangles.push(fragments[inverseIndex - 1]);
+
     }
   }
 
@@ -325,7 +329,7 @@
       ctx.lineWidth = 3;
 
       //ctx.strokeStyle = `rgb(255, 255, 255)`; // sets the color to fill in the rectangle with
-      //ctx.lineWidth = 3;
+      ctx.lineWidth = 3;
 
       // glow effect
       // ctx.shadowColor = `rgba(255, 255, 255, 0.3)` // string
@@ -379,6 +383,18 @@
 
   // - Generate new points on click
   const handleClick = () => {
+    vertices = [],
+      indices = [],
+      fragments = [],
+      newFragments = [],
+      drawArray = [],
+      blueTriangles = [],
+      pinkTriangles = [],
+      newBlueArray = [],
+      newPinkArray = [];
+
+    colorTriggered = false;
+
     drawRandomPoints();
     gameOver = false;
   }
@@ -404,13 +420,7 @@
 
     if (offsetSweep === true) {
       if (offset < 119) {
-        //console.log(`looptest broo`);
-
         offset += 1;
-        //console.log(curve[offset]);
-
-
-        //console.log(`tweede test broer`);
       } else {
         offsetSweep = false;
       }
@@ -419,18 +429,11 @@
     if (offsetSweep === false) {
 
       if (offset > 0) {
-        //console.log(`looptest`);
         offset -= 1;
-
-        //console.log(curve[offset]);
-
       } else {
         offsetSweep = true;
       }
     }
-
-    //console.log(offsetX);
-
 
     fragments.forEach(fragment => {
 
@@ -455,7 +458,6 @@
     if (t < 1) return c / 2 * t * t + b;
     t--;
     return -c / 2 * (t * (t - 2) - 1) + b;
-    //return -c / 2 * (Math.cos(Math.PI * t / d) - 1) + b;
   };
 
   var steps = 120
@@ -465,17 +467,106 @@
     curve.push(stepValue - 60);
   }
 
-  console.log(curve); // [0, 50, 200, 350, 400]
+  const colorSweep = () => {
+
+    sweepIndexLeft = 0;
+    sweepIndexRight = 0;
+
+
+    setIntervalX(() => {
+      if (sweepIndexLeft < pinkTriangles.length) {
+        sweepIndexLeft++;
+        pinkTriangles[pinkTriangles.length - sweepIndexLeft].color = newPinkArray[pinkTriangles.length - sweepIndexLeft];
+      }
+    }, 20, pinkTriangles.length);
+
+    setIntervalX(() => {
+      if (sweepIndexRight < blueTriangles.length) {
+        sweepIndexRight++;
+        blueTriangles[blueTriangles.length - sweepIndexRight].color = newBlueArray[blueTriangles.length - sweepIndexRight];
+      }
+    }, 20, blueTriangles.length);
+
+    // Object.keys(pinkTriangles).forEach((item) => {
+
+    //   setIntervalX(() => {
+    //     pinkTriangles[item].color = newPinkArray[item];
+    //   }, 100, 1);
+    //   //console.log(`ik blijf tekenen bro`);
+
+    // });
+
+    // Object.keys(blueTriangles).forEach((item) => {
+    //   //console.log(`ik blijf tekenen bro`);
+
+    //   setIntervalX(() => {
+    //     blueTriangles[item].color = newBlueArray[item];
+    //   }, 100, 1);
+    // });
+    // Object.keys(drawArray).forEach((item) => {
+    //   console.log(item);
+    //   drawArray[item].fragment[0] = fragments[item];
+    //   drawArray[item].color = sweepColorsArray[item];
+    //   // console.log(drawArray[item].color);
+    // });
+
+
+  }
+
+  const generateNewColors = (blue, pink) => {
+    // Genereer nieuwe color array
+    colorTriggered = true;
+    console.log(`banaan bro`);
+    console.log(`BLAUWE`, blue);
+    console.log(`roze`, pink);
+
+
+    for (let i = 0; i < blue.length; i++) {
+      let h = 237 + (i * (33 / blue.length)),
+        s = '100%',
+        l = `30%`,
+        a = 1;
+      newBlueArray.push([h, s, l, a]);
+    }
+
+    for (let i = 0; i < pink.length; i++) {
+      let h = 303 - (i * (33 / pink.length)),
+        s = '100%',
+        l = `30%`,
+        a = 1;
+      newPinkArray.push([h, s, l, a]);
+    }
+
+    console.log(newBlueArray);
+    console.log(newPinkArray);
+
+    colorSweep();
+  }
+
 
   // -- Draw loop
   const draw = () => {
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     drawGrid();
 
-    Object.keys(drawArray).forEach((item) => {
-      drawArray[item].fragment[0].draw(drawArray[item].color);
+    Object.keys(blueTriangles).forEach((item) => {
+      blueTriangles[item].fragment[0].draw(blueTriangles[item].color);
+      //console.log(`ik blijf tekenen bro`);
     });
+
+    Object.keys(pinkTriangles).forEach((item) => {
+      pinkTriangles[item].fragment[0].draw(pinkTriangles[item].color);
+      //console.log(`ik blijf tekenen bro`);
+    });
+
+    if (fragmentIndex >= inverseIndex) {
+      gameOver = true;
+      if (colorTriggered === false) {
+        generateNewColors(blueTriangles, pinkTriangles);
+      }
+    }
 
     requestAnimationFrame(draw);
   }
