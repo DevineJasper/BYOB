@@ -16,10 +16,17 @@
 
     #c2 {
       position: absolute;
+      z-index: 1;
     }
 
     #c {
       position: absolute;
+      z-index: 2;
+    }
+
+    #c3 {
+      position: absolute;
+      z-index: 3;
     }
   </style>
 </head>
@@ -27,6 +34,8 @@
 <body>
   <canvas id="c2" width="3840" height="1080"></canvas>
   <canvas id="c" width="3840" height="1080"></canvas>
+  <canvas id="c3" width="3840" height="1080"></canvas>
+
 
   <script src="scripts/delaunay.js"></script>
   <script src="scripts/script.js"></script>

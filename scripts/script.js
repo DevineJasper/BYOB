@@ -6,6 +6,9 @@
   const backgroundCanvas = document.getElementById('c2');
   const backgroundCtx = backgroundCanvas.getContext('2d');
 
+  const newCanvas = document.getElementById('c3');
+  const newCtx = newCanvas.getContext('2d');
+
   let vertices = [],
     indices = [],
     fragments = [],
@@ -35,7 +38,7 @@
 
   let fragmentIndex, inverseIndex, sweepIndexLeft, sweepIndexRight;
 
-  let gridSize = [15, 9];
+  let gridSize = [29, 9];
 
   let gameOver = false;
   let colorTriggered = false;
@@ -51,7 +54,11 @@
   let timeSincePress = 0;
   let animationTriggered = false;
 
-  // NEW GRID CODE
+  let point1 = 120;
+  let point2 = 380;
+  let point3 = 422;
+  let point4 = 471;
+  let point5 = 900;
 
 
   const init = () => {
@@ -181,53 +188,133 @@
 
     // clear the arrays for the vertices, indices and fragments of the triangles;
 
-    // // generate random points INSIDE the canvas -- UPPER HALF
+    // // generate random points INSIDE the canvas -- STANDARD
     // for (i = 1; i < gridSize[0]; i++) {
-    //   for (j = 100; j < 422; j += 100) {
+    //   for (j = 1; j < gridSize[1]; j++) {
     //     vertices.push([
-    //       i * canvas.width / gridSize[0],
-    //       j
+    //       i * canvas.width / gridSize[0] + randomRange(-150, 150),
+    //       j * canvas.height / gridSize[1] + randomRange(-150, 150)
     //     ]);
     //   }
     // }
 
-    // // generate random points INSIDE the canvas -- DISTORTED MID
-    // for (i = 1; i < gridSize[0]; i++) {
-    //   for (j = 422; j < 471; j += 15) {
-    //     vertices.push([
-    //       i * canvas.width / gridSize[0],
-    //       j
-    //     ]);
-    //   }
-    // }
+    // generate random points INSIDE the canvas -- TOP
+    for (i = 1; i < gridSize[0]; i++) {
+      for (j = point1; j < point2; j += 100) {
+        vertices.push([
+          i * canvas.width / gridSize[0] + randomRange(-10, 10),
+          j + randomRange(-10, 10)
+        ]);
+      }
+    }
 
-    // // generate random points INSIDE the canvas -- BOTTOM HALF
-    // for (i = 1; i < gridSize[0]; i++) {
-    //   for (j = 471; j < 900; j += 100) {
-    //     vertices.push([
-    //       i * canvas.width / gridSize[0],
-    //       j
-    //     ]);
-    //   }
-    // }
+    // generate random points INSIDE the canvas -- BALK
+    for (i = 1; i < gridSize[0]; i++) {
+      for (j = point2; j < point3; j += 42) {
+        vertices.push([
+          i * canvas.width / gridSize[0] + randomRange(-10, 10),
+          j + randomRange(-10, 10)
+        ]);
+      }
+    }
 
+    // generate random points INSIDE the canvas -- AFDAK
+    for (i = 1; i < gridSize[0]; i++) {
+      for (j = point3; j < point4; j += 15) {
+        vertices.push([
+          i * canvas.width / gridSize[0] + randomRange(-10, 10),
+          j + randomRange(-10, 10)
+        ]);
+      }
+    }
 
+    // generate random points INSIDE the canvas -- BOTTOM
+    for (i = 1; i < gridSize[0]; i++) {
+      for (j = point4; j < point5; j += 100) {
+        vertices.push([
+          i * canvas.width / gridSize[0] + randomRange(-10, 10),
+          j + randomRange(-10, 10)
+        ]);
+      }
+    }
+
+    // generate random ALONG SIDE PART 1
+    for (j = point1; j < point2; j += 100) {
+      vertices.push([
+        0,
+        j + randomRange(-10, 10),
+      ]);
+      vertices.push([
+        3840,
+        j + randomRange(-10, 10),
+      ]);
+    }
+
+    // generate random ALONG SIDE PART 1
+    for (j = point2; j < point3; j += 42) {
+      vertices.push([
+        0,
+        j + randomRange(-10, 10),
+      ]);
+      vertices.push([
+        3840,
+        j + randomRange(-10, 10),
+      ]);
+    }
+
+    // generate random ALONG SIDE PART 1
+    for (j = point3; j < point4; j += 15) {
+      vertices.push([
+        0,
+        j + randomRange(-10, 10),
+      ]);
+      vertices.push([
+        3840,
+        j + randomRange(-10, 10),
+      ]);
+    }
+
+    // generate random ALONG SIDE PART 1
+    for (j = point4; j < point5; j += 100) {
+      vertices.push([
+        0,
+        j + randomRange(-10, 10),
+      ]);
+      vertices.push([
+        3840,
+        j + randomRange(-10, 10),
+      ]);
+    }
 
     // // Draw points along top and bottom side -- DISTORT -- X
     // for (i = 1; i < gridSize[0]; i++) {
     //   vertices.push([
     //     i * canvas.width / gridSize[0],
-    //     100
+    //     point1
     //   ])
     //   vertices.push([
     //     i * canvas.width / gridSize[0],
-    //     900
+    //     point5
     //   ])
     // }
 
     // // Draw points along top and bottom side -- DISTORTED MID -- y
     // for (i = 1; i < gridSize[0]; i++) {
-    //   for (j = 422; j < 471; j += 15) {
+    //   for (j = point2; j < point3; j += 42) {
+    //     vertices.push([
+    //       0,
+    //       j
+    //     ])
+    //     vertices.push([
+    //       3840,
+    //       j
+    //     ])
+    //   }
+    // }
+
+    // // Draw points along top and bottom side -- DISTORTED MID -- y
+    // for (i = 1; i < gridSize[0]; i++) {
+    //   for (j = point3; j < point4; j += 15) {
     //     vertices.push([
     //       0,
     //       j
@@ -241,7 +328,7 @@
 
     // // Draw points along top and bottom side -- DISTORTED TOP -- y
     // for (i = 1; i < gridSize[0]; i++) {
-    //   for (j = 100; j < 422; j += 100) {
+    //   for (j = point1; j < point2; j += 100) {
     //     vertices.push([
     //       0,
     //       j
@@ -255,7 +342,7 @@
 
     // // Draw points along top and bottom side -- DISTORTED BOT -- y
     // for (i = 1; i < gridSize[0]; i++) {
-    //   for (j = 471; j < 900; j += 100) {
+    //   for (j = point4; j < point5; j += 100) {
     //     vertices.push([
     //       0,
     //       j
@@ -267,62 +354,48 @@
     //   }
     // }
 
-    // // generate random points INSIDE the canvas -- STANDARD
-    // for (i = 1; i < gridSize[0]; i++) {
-    //   for (j = 1; j < gridSize[1]; j++) {
-    //     vertices.push([
-    //       i * canvas.width / gridSize[0] + randomRange(-150, 150),
-    //       j * canvas.height / gridSize[1] + randomRange(-150, 150)
-    //     ]);
-    //   }
+    // Draw points along top and bottom side -- DISTORT
+    // for (j = 1; j < gridSize[1]; j++) {
+    //   vertices.push([
+    //     0,
+    //     j * canvas.height / gridSize[1]
+    //   ])
+    //   vertices.push([
+    //     canvas.width,
+    //     j * canvas.height / gridSize[1]
+    //   ])
     // }
 
 
+    // // Draw points along top and bottom side
+    // for (i = 1; i < gridSize[0]; i++) {
+    //   vertices.push([
+    //     i * canvas.width / gridSize[0] + randomRange(-150, 150),
+    //     0
+    //   ])
+    //   vertices.push([
+    //     i * canvas.width / gridSize[0] + randomRange(-150, 150),
+    //     canvas.height
+    //   ])
+    // }
 
-
-
-    Draw points along top and bottom side-- DISTORT
-    for (j = 1; j < gridSize[1]; j++) {
-      vertices.push([
-        0,
-        j * canvas.height / gridSize[1]
-      ])
-      vertices.push([
-        canvas.width,
-        j * canvas.height / gridSize[1]
-      ])
-    }
-
-
-    // Draw points along top and bottom side
-    for (i = 1; i < gridSize[0]; i++) {
-      vertices.push([
-        i * canvas.width / gridSize[0] + randomRange(-150, 150),
-        0
-      ])
-      vertices.push([
-        i * canvas.width / gridSize[0] + randomRange(-150, 150),
-        canvas.height
-      ])
-    }
-
-    // Draw points along top and bottom side
-    for (j = 1; j < gridSize[1]; j++) {
-      vertices.push([
-        0,
-        j * canvas.height / gridSize[1] + randomRange(-150, 150)
-      ])
-      vertices.push([
-        canvas.width,
-        j * canvas.height / gridSize[1] + randomRange(-150, 150)
-      ])
-    }
+    // // Draw points along top and bottom side
+    // for (j = 1; j < gridSize[1]; j++) {
+    //   vertices.push([
+    //     0,
+    //     j * canvas.height / gridSize[1] + randomRange(-150, 150)
+    //   ])
+    //   vertices.push([
+    //     canvas.width,
+    //     j * canvas.height / gridSize[1] + randomRange(-150, 150)
+    //   ])
+    // }
 
     // draw corner points
-    vertices.push([0, 100]);
-    vertices.push([canvas.width, 100]);
-    vertices.push([canvas.width, 900]);
-    vertices.push([0, 900]);
+    vertices.push([0, point1]);
+    vertices.push([canvas.width, point1]);
+    vertices.push([canvas.width, point5]);
+    vertices.push([0, point5]);
 
     // Generate the triangles
     indices = Delaunay.triangulate(vertices);
@@ -722,6 +795,15 @@
 
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    newCtx.clearRect(0, 0, canvas.width, canvas.height);
+    newCtx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    newCtx.fillRect(0, 380, 3840, 42);
+
+    newCtx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    newCtx.fillRect(0, 422, 3840, 49);
+    newCtx.fill();
+
 
     drawGrid();
 
