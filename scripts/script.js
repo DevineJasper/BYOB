@@ -16,7 +16,8 @@
     blueTriangles = [],
     pinkTriangles = [],
     newBlueArray = [],
-    newPinkArray = [];
+    newPinkArray = [],
+    curve = [];
 
   let player1Buttons = [
     { buttonName: "left", buttonValue: 37 },
@@ -34,7 +35,7 @@
 
   let fragmentIndex, inverseIndex, sweepIndexLeft, sweepIndexRight;
 
-  let gridSize = [10, 6];
+  let gridSize = [15, 9];
 
   let gameOver = false;
   let colorTriggered = false;
@@ -43,16 +44,18 @@
 
   let offsetSweep = true;
 
-  let curve = []
+  // NIEUW END GAME BOOLS
+  let pinkSweepEnded, blueSweepEnded = false;
 
+  // PRUTS CODE LED ANIMATIE
+  let timeSincePress = 0;
+  let animationTriggered = false;
 
+  // NEW GRID CODE
 
 
   const init = () => {
     document.addEventListener(`click`, handleClick);
-
-    //drawGrid();
-
 
     // Draw the random points
     drawRandomPoints();
@@ -82,6 +85,10 @@
     if (gameOver === false) {
 
       if (e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39) {
+        // PRUTS CODE LED ANIMATIE
+        timeSincePress = 0;
+        animationTriggered = false;
+        // EINDE PRUTS
         if (e.keyCode === player1Key.buttonValue) {
           console.log(`Player 1: Juiste toets`);
           getPlayerKey(1);
@@ -94,10 +101,8 @@
             } else {
               console.log(`STOP`);
             }
-
-            console.log(fragmentIndex);
-            console.log(inverseIndex);
-
+            console.log(`fragment: `, fragmentIndex);
+            console.log(`inverse: `, inverseIndex);
           }, 100, 2);
 
 
@@ -107,6 +112,11 @@
       }
 
       if (e.keyCode === 65 || e.keyCode === 87 || e.keyCode === 68) {
+        // PRUTS CODE LED ANIMATIE
+        timeSincePress = 0;
+        animationTriggered = true;
+        // EINDE PRUTS
+
         if (e.keyCode === player2Key.buttonValue) {
           console.log(`Player 2: Juiste toets`);
           getPlayerKey(2);
@@ -119,6 +129,10 @@
             } else {
               console.log(`STOP`);
             }
+
+            console.log(`fragment: `, fragmentIndex);
+            console.log(`inverse: `, inverseIndex);
+
           }, 100, 2);
 
 
@@ -126,6 +140,8 @@
           console.log(`Player 2: FOUT!!!`);
         }
       }
+
+
     }
   }
 
@@ -165,15 +181,118 @@
 
     // clear the arrays for the vertices, indices and fragments of the triangles;
 
-    // generate random points INSIDE the canvas
-    for (i = 1; i < gridSize[0]; i++) {
-      for (j = 1; j < gridSize[1]; j++) {
-        vertices.push([
-          i * canvas.width / gridSize[0] + randomRange(-150, 150),
-          j * canvas.height / gridSize[1] + randomRange(-150, 150)
-        ]);
-      }
+    // // generate random points INSIDE the canvas -- UPPER HALF
+    // for (i = 1; i < gridSize[0]; i++) {
+    //   for (j = 100; j < 422; j += 100) {
+    //     vertices.push([
+    //       i * canvas.width / gridSize[0],
+    //       j
+    //     ]);
+    //   }
+    // }
+
+    // // generate random points INSIDE the canvas -- DISTORTED MID
+    // for (i = 1; i < gridSize[0]; i++) {
+    //   for (j = 422; j < 471; j += 15) {
+    //     vertices.push([
+    //       i * canvas.width / gridSize[0],
+    //       j
+    //     ]);
+    //   }
+    // }
+
+    // // generate random points INSIDE the canvas -- BOTTOM HALF
+    // for (i = 1; i < gridSize[0]; i++) {
+    //   for (j = 471; j < 900; j += 100) {
+    //     vertices.push([
+    //       i * canvas.width / gridSize[0],
+    //       j
+    //     ]);
+    //   }
+    // }
+
+
+
+    // // Draw points along top and bottom side -- DISTORT -- X
+    // for (i = 1; i < gridSize[0]; i++) {
+    //   vertices.push([
+    //     i * canvas.width / gridSize[0],
+    //     100
+    //   ])
+    //   vertices.push([
+    //     i * canvas.width / gridSize[0],
+    //     900
+    //   ])
+    // }
+
+    // // Draw points along top and bottom side -- DISTORTED MID -- y
+    // for (i = 1; i < gridSize[0]; i++) {
+    //   for (j = 422; j < 471; j += 15) {
+    //     vertices.push([
+    //       0,
+    //       j
+    //     ])
+    //     vertices.push([
+    //       3840,
+    //       j
+    //     ])
+    //   }
+    // }
+
+    // // Draw points along top and bottom side -- DISTORTED TOP -- y
+    // for (i = 1; i < gridSize[0]; i++) {
+    //   for (j = 100; j < 422; j += 100) {
+    //     vertices.push([
+    //       0,
+    //       j
+    //     ])
+    //     vertices.push([
+    //       3840,
+    //       j
+    //     ]);
+    //   }
+    // }
+
+    // // Draw points along top and bottom side -- DISTORTED BOT -- y
+    // for (i = 1; i < gridSize[0]; i++) {
+    //   for (j = 471; j < 900; j += 100) {
+    //     vertices.push([
+    //       0,
+    //       j
+    //     ])
+    //     vertices.push([
+    //       3840,
+    //       j
+    //     ]);
+    //   }
+    // }
+
+    // // generate random points INSIDE the canvas -- STANDARD
+    // for (i = 1; i < gridSize[0]; i++) {
+    //   for (j = 1; j < gridSize[1]; j++) {
+    //     vertices.push([
+    //       i * canvas.width / gridSize[0] + randomRange(-150, 150),
+    //       j * canvas.height / gridSize[1] + randomRange(-150, 150)
+    //     ]);
+    //   }
+    // }
+
+
+
+
+
+    Draw points along top and bottom side-- DISTORT
+    for (j = 1; j < gridSize[1]; j++) {
+      vertices.push([
+        0,
+        j * canvas.height / gridSize[1]
+      ])
+      vertices.push([
+        canvas.width,
+        j * canvas.height / gridSize[1]
+      ])
     }
+
 
     // Draw points along top and bottom side
     for (i = 1; i < gridSize[0]; i++) {
@@ -200,10 +319,10 @@
     }
 
     // draw corner points
-    vertices.push([0, 0]);
-    vertices.push([canvas.width, 0]);
-    vertices.push([canvas.width, canvas.height]);
-    vertices.push([0, canvas.height]);
+    vertices.push([0, 100]);
+    vertices.push([canvas.width, 100]);
+    vertices.push([canvas.width, 900]);
+    vertices.push([0, 900]);
 
     // Generate the triangles
     indices = Delaunay.triangulate(vertices);
@@ -219,11 +338,13 @@
 
     // Sort the fragments
     sortTriangles(fragments);
+    console.log(vertices);
 
     // Calculate starting points of both sides
     fragmentIndex = 0;
     inverseIndex = fragments.length;
     drawGrid();
+
   }
 
   // -- Generate the colors --
@@ -402,21 +523,6 @@
   const drawGrid = () => {
 
     backgroundCtx.clearRect(0, 0, canvas.width, canvas.height);
-    // for (let x = 0; x < canvas.width; x += 120) {
-    //   for (let y = 0; y < canvas.height; y += 120) {
-    //     backgroundCtx.moveTo(0, y);
-    //     backgroundCtx.lineTo(3840, y);
-    //     backgroundCtx.moveTo(x, 0);
-    //     backgroundCtx.lineTo(x, 1080);
-    //   }
-    // }
-
-    // backgroundCtx.lineWidth = 0.05;
-    // backgroundCtx.strokeStyle = "#0054FF";
-    // backgroundCtx.stroke();
-
-    // console.log(`test`);
-    // console.log(newFragments);
 
     if (offsetSweep === true) {
       if (offset < 119) {
@@ -435,22 +541,20 @@
       }
     }
 
-    fragments.forEach(fragment => {
-
+    fragments.forEach((fragment) => {
       if (fragment.v0[0] === 0 || fragment.v1[0] === 0 || fragment.v2[0] === 0 || fragment.v0[1] === 0 || fragment.v1[1] === 0 || fragment.v2[1] === 0 || fragment.v0[0] === canvas.width || fragment.v1[0] === canvas.width || fragment.v2[0] === canvas.width || fragment.v0[1] === canvas.height || fragment.v1[1] === canvas.height || fragment.v2[1] === canvas.height) {
       } else {
-        fragment.v0[0] = fragment.v0[0] + (curve[offset] / 1920);
-        fragment.v0[1] = fragment.v0[1] + (curve[offset] / 1920);
-        fragment.v1[0] = fragment.v1[0] + (curve[offset] / 1920);
-        fragment.v1[1] = fragment.v1[1] + (curve[offset] / 1920);
-        fragment.v2[0] = fragment.v2[0] + (curve[offset] / 1920);
-        fragment.v2[1] = fragment.v2[1] + (curve[offset] / 1920);
+        fragment.v0[0] = fragment.v0[0] + ((curve[offset]) / 1920);
+        fragment.v0[1] = fragment.v0[1] + ((curve[offset]) / 1920);
+        fragment.v1[0] = fragment.v1[0] + ((curve[offset]) / 1920);
+        fragment.v1[1] = fragment.v1[1] + ((curve[offset]) / 1920);
+        fragment.v2[0] = fragment.v2[0] + ((curve[offset]) / 1920);
+        fragment.v2[1] = fragment.v2[1] + ((curve[offset]) / 1920);
       }
 
       fragment.drawBg();
-    })
 
-    //console.log(fragments.fragmentIndex);
+    })
   }
 
   const easeInOutQuad = (t, b, c, d) => {
@@ -472,43 +576,89 @@
     sweepIndexLeft = 0;
     sweepIndexRight = 0;
 
+    // NIEUWE END GAME CODE
+    if (pinkTriangles.length === 0) {
+      pinkSweepEnded = true;
+      handleSweepEnd();
+    }
+
+    if (blueTriangles.length === 0) {
+      blueSweepEnded = true;
+      handleSweepEnd();
+    }
+
 
     setIntervalX(() => {
       if (sweepIndexLeft < pinkTriangles.length) {
         sweepIndexLeft++;
         pinkTriangles[pinkTriangles.length - sweepIndexLeft].color = newPinkArray[pinkTriangles.length - sweepIndexLeft];
+
+        // NIEUWE END GAME CODE
+        if (sweepIndexLeft === pinkTriangles.length) {
+          console.log(`sweep pink klaar`);
+          pinkSweepEnded = true;
+          handleSweepEnd();
+        }
       }
+
     }, 20, pinkTriangles.length);
 
     setIntervalX(() => {
       if (sweepIndexRight < blueTriangles.length) {
         sweepIndexRight++;
         blueTriangles[blueTriangles.length - sweepIndexRight].color = newBlueArray[blueTriangles.length - sweepIndexRight];
+
+        // NIEUWE END GAME CODE
+        if (sweepIndexRight === blueTriangles.length) {
+          console.log(`sweep blauw klaar`);
+          blueSweepEnded = true;
+          handleSweepEnd();
+        }
       }
     }, 20, blueTriangles.length);
 
-    // Object.keys(pinkTriangles).forEach((item) => {
 
-    //   setIntervalX(() => {
-    //     pinkTriangles[item].color = newPinkArray[item];
-    //   }, 100, 1);
-    //   //console.log(`ik blijf tekenen bro`);
+  }
 
-    // });
+  // NIEUWE END GAME CODE
+  const handleSweepEnd = () => {
+    if (blueSweepEnded === true && pinkSweepEnded === true) {
+      console.log(`all sweeps ended, restart the game`);
 
-    // Object.keys(blueTriangles).forEach((item) => {
-    //   //console.log(`ik blijf tekenen bro`);
+      setIntervalX(() => {
+        restartGame();
+        console.log(`voer restartgame code uit`);
+      }, 2000, 1);
+    }
+  }
 
-    //   setIntervalX(() => {
-    //     blueTriangles[item].color = newBlueArray[item];
-    //   }, 100, 1);
-    // });
-    // Object.keys(drawArray).forEach((item) => {
-    //   console.log(item);
-    //   drawArray[item].fragment[0] = fragments[item];
-    //   drawArray[item].color = sweepColorsArray[item];
-    //   // console.log(drawArray[item].color);
-    // });
+  // NIEUWE END GAME CODE
+  const restartGame = () => {
+    vertices = [],
+      indices = [],
+      fragments = [],
+      newFragments = [],
+      drawArray = [],
+      blueTriangles = [],
+      pinkTriangles = [],
+      newBlueArray = [],
+      newPinkArray = [];
+    blueSweepEnded = false;
+    pinkSweepEnded = false;
+
+    colorTriggered = false;
+
+    gameOver = false;
+
+    colorsPlayer1 = [],
+      colorsPlayer2 = [];
+
+    generateColors();
+    drawRandomPoints();
+    getPlayerKey(1);
+    getPlayerKey(2);
+
+    timeSincePress = 0;
 
 
   }
@@ -543,9 +693,33 @@
     colorSweep();
   }
 
+  // PRUTS CODE LED ANIMATIE
+  playIdleAnimation = () => {
+    animationTriggered = true;
+    console.log(`dit zou maar 1 keer moeten loggen broer`);
+
+    // Speel de animatie af
+
+  }
+
+
 
   // -- Draw loop
   const draw = () => {
+
+    // PRUTS CODE LED ANIM
+
+    timeSincePress++;
+
+    if (timeSincePress >= 1000 * 60) {
+      console.log(`5 seconden idle`);
+
+      if (animationTriggered === false) {
+        playIdleAnimation();
+      }
+    }
+    // EINDE PRUTS CODE LED ANIM
+
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
