@@ -106,7 +106,6 @@
       }
     };
 
-    // if (gameOver === false) {
     button1.on("press", function() {
       if (gameOver === false) {
         if (musicPlaying === false) {
@@ -897,7 +896,6 @@
 
       if (musicPlaying === true) {
         $muziek.play();
-        // $muziek.volume = 1;
       } else {
         $muziek.pause();
         $muziek.currentTime = 0;
